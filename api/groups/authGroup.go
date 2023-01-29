@@ -1,7 +1,6 @@
 package groups
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
@@ -9,43 +8,49 @@ import (
 	"github.com/ElrondNetwork/elrond-go-core/core/check"
 	"github.com/ElrondNetwork/elrond-go/api/errors"
 	elrondApiShared "github.com/ElrondNetwork/elrond-go/api/shared"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/api/shared"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/core/requests"
+	"github.com/dragos-rebegea/evaluare-tool/api/shared"
+	"github.com/dragos-rebegea/evaluare-tool/authentication"
+	"github.com/dragos-rebegea/evaluare-tool/core"
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	sendTransaction = "/sendTransaction"
-	registerPath    = "/register"
+	registerPath = "/register"
 )
 
 type authGroup struct {
 	*baseGroup
-	facade    shared.FacadeHandler
-	mutFacade sync.RWMutex
+	facade               shared.FacadeHandler
+	mutFacade            sync.RWMutex
+	database             *core.DatabaseHandler
+	authenticationNeeded bool
 }
 
-// NewAuthGroup returns a new instance of authGroup
-func NewAuthGroup(facade shared.FacadeHandler) (*authGroup, error) {
+// NewAuthGroup returns a new instance of evaluationGroup
+func NewAuthGroup(facade shared.FacadeHandler, dbHandler *core.DatabaseHandler) (*authGroup, error) {
 	if check.IfNil(facade) {
-		return nil, fmt.Errorf("%w for node group", errors.ErrNilFacadeHandler)
+		return nil, fmt.Errorf("%w for auth group", errors.ErrNilFacadeHandler)
 	}
-
+	if check.IfNil(dbHandler) {
+		return nil, fmt.Errorf("%w for auth group", ErrNilDatabaseHandler)
+	}
 	ag := &authGroup{
-		facade:    facade,
-		baseGroup: &baseGroup{},
+		facade:               facade,
+		baseGroup:            &baseGroup{},
+		database:             dbHandler,
+		authenticationNeeded: false,
 	}
 
 	endpoints := []*elrondApiShared.EndpointHandlerData{
 		{
-			Path:    sendTransaction,
+			Path:    tokenPath,
 			Method:  http.MethodPost,
-			Handler: ag.sendTransaction,
+			Handler: ag.generateToken,
 		},
 		{
 			Path:    registerPath,
 			Method:  http.MethodPost,
-			Handler: ag.register,
+			Handler: ag.registerUser,
 		},
 	}
 	ag.endpoints = endpoints
@@ -53,66 +58,65 @@ func NewAuthGroup(facade shared.FacadeHandler) (*authGroup, error) {
 	return ag, nil
 }
 
-// sendTransaction returns will send the transaction signed by the guardian if the verification passed
-func (ag *authGroup) sendTransaction(c *gin.Context) {
-	var request requests.SendTransaction
-
-	err := json.NewDecoder(c.Request.Body).Decode(&request)
-	hash := ""
-	if err == nil {
-		hash, err = ag.facade.Validate(request)
-	}
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			elrondApiShared.GenericAPIResponse{
-				Data:  nil,
-				Error: fmt.Sprintf("%s: %s", ErrValidation.Error(), err.Error()),
-				Code:  elrondApiShared.ReturnCodeInternalError,
-			},
-		)
-		return
-	}
-	c.JSON(
-		http.StatusOK,
-		elrondApiShared.GenericAPIResponse{
-			Data:  hash,
-			Error: "",
-			Code:  elrondApiShared.ReturnCodeSuccess,
-		},
-	)
+type TokenRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-// register will register a new provider for the user
-// and (optionally) returns some information required for the user to set up the OTP on his end (eg: QR code).
-func (ag *authGroup) register(c *gin.Context) {
-	var request requests.Register
-
-	err := json.NewDecoder(c.Request.Body).Decode(&request)
-	var qr []byte
-	if err == nil {
-		qr, err = ag.facade.RegisterUser(request)
-	}
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			elrondApiShared.GenericAPIResponse{
-				Data:  nil,
-				Error: fmt.Sprintf("%s: %s", ErrRegister.Error(), err.Error()),
-				Code:  elrondApiShared.ReturnCodeInternalError,
-			},
-		)
+func (ag *authGroup) registerUser(context *gin.Context) {
+	var admin authentication.Profesor
+	if err := context.ShouldBindJSON(&admin); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
 		return
 	}
 
-	c.JSON(
-		http.StatusOK,
-		elrondApiShared.GenericAPIResponse{
-			Data:  qr,
-			Error: "",
-			Code:  elrondApiShared.ReturnCodeSuccess,
-		},
-	)
+	if err := admin.HashPassword(admin.Password); err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	admin.IsAdmin = true
+	err := ag.database.CreateProfesor(&admin)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusCreated, gin.H{"userId": admin.ID, "email": admin.Email, "username": admin.Username})
+}
+
+func (ag *authGroup) generateToken(context *gin.Context) {
+	var request TokenRequest
+	if err := context.ShouldBindJSON(&request); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	user, err := ag.database.GetProfesorByEmail(request.Email)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	credentialError := user.CheckPassword(request.Password)
+	if credentialError != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		context.Abort()
+		return
+	}
+
+	tokenString, err := authentication.GenerateJWT(user.Email, user.Username)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
 // UpdateFacade will update the facade
@@ -126,6 +130,11 @@ func (ag *authGroup) UpdateFacade(newFacade shared.FacadeHandler) error {
 	ag.mutFacade.Unlock()
 
 	return nil
+}
+
+// IsAuthenticationNeeded will return true if the group requires authentication
+func (ag *authGroup) IsAuthenticationNeeded() bool {
+	return ag.authenticationNeeded
 }
 
 // IsInterfaceNil returns true if there is no value under the interface

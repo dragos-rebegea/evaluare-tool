@@ -5,7 +5,7 @@ import (
 
 	logger "github.com/ElrondNetwork/elrond-go-logger"
 	"github.com/ElrondNetwork/elrond-go/api/shared"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
+	"github.com/dragos-rebegea/evaluare-tool/config"
 	"github.com/gin-gonic/gin"
 )
 

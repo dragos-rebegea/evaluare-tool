@@ -14,13 +14,8 @@ import (
 	elrondFactory "github.com/ElrondNetwork/elrond-go/cmd/node/factory"
 	elrondCommon "github.com/ElrondNetwork/elrond-go/common"
 	"github.com/ElrondNetwork/elrond-go/common/logging"
-	"github.com/ElrondNetwork/elrond-sdk-erdgo/blockchain"
-	erdgoCore "github.com/ElrondNetwork/elrond-sdk-erdgo/core"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/core"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/core/guardian"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/factory"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/providers"
+	"github.com/dragos-rebegea/evaluare-tool/config"
+	"github.com/dragos-rebegea/evaluare-tool/factory"
 	"github.com/urfave/cli"
 	_ "github.com/urfave/cli"
 )
@@ -28,7 +23,7 @@ import (
 const (
 	filePathPlaceholder = "[path]"
 	defaultLogsPath     = "logs"
-	logFilePrefix       = "multi-factor-auth-go-service"
+	logFilePrefix       = "evaluare-tool"
 	logMaxSizeInMB      = 1024
 	issuer              = "ElrondNetwork" //TODO: add issuer & digits into config.toml
 	digits              = 6
@@ -109,30 +104,7 @@ func startService(ctx *cli.Context, version string) error {
 		FlagsConfig:     flagsConfig,
 	}
 
-	argsProxy := blockchain.ArgsElrondProxy{
-		ProxyURL:            cfg.Proxy.NetworkAddress,
-		SameScState:         false,
-		ShouldBeSynced:      false,
-		FinalityCheck:       cfg.Proxy.ProxyFinalityCheck,
-		AllowedDeltaToFinal: cfg.Proxy.ProxyMaxNoncesDelta,
-		CacheExpirationTime: time.Second * time.Duration(cfg.Proxy.ProxyCacherExpirationSeconds),
-		EntityType:          erdgoCore.RestAPIEntityType(cfg.Proxy.ProxyRestAPIEntityType),
-	}
-
-	proxy, err := blockchain.NewElrondProxy(argsProxy)
-	if err != nil {
-		return err
-	}
-	guard, err := guardian.NewGuardian(cfg.Guardian, proxy)
-	if err != nil {
-		return err
-	}
-
-	providersMap := make(map[string]core.Provider)
-	totp, err := providers.NewTOTP(issuer, digits)
-	providersMap["totp"] = totp
-
-	webServer, err := factory.StartWebServer(configs, providersMap, guard)
+	webServer, err := factory.StartWebServer(configs)
 	if err != nil {
 		return err
 	}

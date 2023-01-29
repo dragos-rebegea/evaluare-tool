@@ -3,22 +3,19 @@ package factory
 import (
 	"io"
 
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/api/gin"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/core"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/facade"
+	"github.com/dragos-rebegea/evaluare-tool/api/gin"
+	"github.com/dragos-rebegea/evaluare-tool/config"
+	"github.com/dragos-rebegea/evaluare-tool/facade"
 )
 
 // StartWebServer creates and starts a web server able to respond with the metrics holder information
-func StartWebServer(configs config.Configs, providersMap map[string]core.Provider, guardian core.Guardian) (io.Closer, error) {
-	argsFacade := facade.ArgsAuthFacade{
-		ProvidersMap: providersMap,
-		Guardian:     guardian,
+func StartWebServer(configs config.Configs) (io.Closer, error) {
+	argsFacade := facade.ArgsEvaluationFacade{
 		ApiInterface: configs.FlagsConfig.RestApiInterface,
 		PprofEnabled: configs.FlagsConfig.EnablePprof,
 	}
 
-	authFacade, err := facade.NewAuthFacade(argsFacade)
+	authFacade, err := facade.NewEvaluationFacade(argsFacade)
 	if err != nil {
 		return nil, err
 	}

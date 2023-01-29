@@ -1,8 +1,7 @@
 package shared
 
 import (
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/core/requests"
+	"github.com/dragos-rebegea/evaluare-tool/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +12,7 @@ type GroupHandler interface {
 		ws *gin.RouterGroup,
 		apiConfig config.ApiRoutesConfig,
 	)
+	IsAuthenticationNeeded() bool
 	IsInterfaceNil() bool
 }
 
@@ -20,8 +20,6 @@ type GroupHandler interface {
 type FacadeHandler interface {
 	RestApiInterface() string
 	PprofEnabled() bool
-	Validate(request requests.SendTransaction) (string, error)
-	RegisterUser(request requests.Register) ([]byte, error)
 	IsInterfaceNil() bool
 }
 

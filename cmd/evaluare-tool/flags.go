@@ -3,7 +3,7 @@ package main
 import (
 	logger "github.com/ElrondNetwork/elrond-go-logger"
 	"github.com/ElrondNetwork/elrond-go/facade"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
+	"github.com/dragos-rebegea/evaluare-tool/config"
 	"github.com/urfave/cli"
 )
 

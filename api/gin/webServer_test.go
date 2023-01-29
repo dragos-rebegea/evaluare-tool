@@ -8,12 +8,12 @@ import (
 
 	"github.com/ElrondNetwork/elrond-go-core/core/check"
 	"github.com/ElrondNetwork/elrond-go/api/middleware"
-	apiErrors "github.com/ElrondNetwork/multi-factor-auth-go-service/api/errors"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/api/shared"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/core"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/testsCommon/facade"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/testsCommon/groups"
+	apiErrors "github.com/dragos-rebegea/evaluare-tool/api/errors"
+	"github.com/dragos-rebegea/evaluare-tool/api/shared"
+	"github.com/dragos-rebegea/evaluare-tool/config"
+	"github.com/dragos-rebegea/evaluare-tool/core"
+	"github.com/dragos-rebegea/evaluare-tool/testsCommon/facade"
+	"github.com/dragos-rebegea/evaluare-tool/testsCommon/groups"
 	"github.com/stretchr/testify/assert"
 )
 

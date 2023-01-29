@@ -13,12 +13,13 @@ import (
 	"github.com/ElrondNetwork/elrond-go/api/logs"
 	"github.com/ElrondNetwork/elrond-go/api/middleware"
 	elrondShared "github.com/ElrondNetwork/elrond-go/api/shared"
-	apiErrors "github.com/ElrondNetwork/multi-factor-auth-go-service/api/errors"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/api/groups"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/api/shared"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/core"
 	"github.com/btcsuite/websocket"
+	apiErrors "github.com/dragos-rebegea/evaluare-tool/api/errors"
+	"github.com/dragos-rebegea/evaluare-tool/api/groups"
+	"github.com/dragos-rebegea/evaluare-tool/api/shared"
+	"github.com/dragos-rebegea/evaluare-tool/authentication"
+	"github.com/dragos-rebegea/evaluare-tool/config"
+	"github.com/dragos-rebegea/evaluare-tool/core"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
@@ -132,11 +133,25 @@ func (ws *webServer) StartHttpServer() error {
 func (ws *webServer) createGroups() error {
 	groupsMap := make(map[string]shared.GroupHandler)
 
-	authGroup, err := groups.NewAuthGroup(ws.facade)
+	dbHandler, err := core.NewDatabaseHandler("user:password@tcp(localhost:3315)/id_db?parseTime=true")
+
+	authGroup, err := groups.NewAuthGroup(ws.facade, dbHandler)
 	if err != nil {
 		return err
 	}
 	groupsMap["auth"] = authGroup
+
+	evaluationGroup, err := groups.NewEvaluationGroup(ws.facade, dbHandler)
+	if err != nil {
+		return err
+	}
+	groupsMap["evaluation"] = evaluationGroup
+
+	adminGroup, err := groups.NewAdminGroup(ws.facade, dbHandler)
+	if err != nil {
+		return err
+	}
+	groupsMap["admin"] = adminGroup
 
 	ws.groups = groupsMap
 
@@ -170,6 +185,9 @@ func (ws *webServer) registerRoutes(ginRouter *gin.Engine) {
 	for groupName, groupHandler := range ws.groups {
 		log.Debug("registering gin API group", "group name", groupName)
 		ginGroup := ginRouter.Group(fmt.Sprintf("/%s", groupName))
+		if groupHandler.IsAuthenticationNeeded() {
+			ginGroup.Use(authentication.Auth())
+		}
 		groupHandler.RegisterRoutes(ginGroup, ws.apiConfig)
 	}
 

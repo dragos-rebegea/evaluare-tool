@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/api/shared"
-	"github.com/ElrondNetwork/multi-factor-auth-go-service/config"
+	"github.com/dragos-rebegea/evaluare-tool/api/shared"
+	"github.com/dragos-rebegea/evaluare-tool/config"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )

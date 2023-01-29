@@ -14,5 +14,14 @@
 [APIPackages.auth]
     Routes = [
         { Name = "/register", Open = true },
-        { Name = "/sendTransaction", Open = true },
+        { Name = "/token", Open = true },
+    ]
+[APIPackages.admin]
+    Routes = [
+        { Name = "/ping", Open = true },
+        { Name = "/createClass", Open = true },
+    ]
+[APIPackages.evaluation]
+    Routes = [
+        { Name = "/getStudentsByClass/:class", Open = true },
     ]

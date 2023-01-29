@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/ElrondNetwork/elrond-go-core/core/check"
-	apiErrors "github.com/ElrondNetwork/multi-factor-auth-go-service/api/errors"
-	testsServer "github.com/ElrondNetwork/multi-factor-auth-go-service/testsCommon/server"
+	apiErrors "github.com/dragos-rebegea/evaluare-tool/api/errors"
+	testsServer "github.com/dragos-rebegea/evaluare-tool/testsCommon/server"
 	"github.com/stretchr/testify/assert"
 )
 
