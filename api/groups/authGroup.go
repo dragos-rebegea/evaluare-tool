@@ -71,12 +71,6 @@ func (ag *authGroup) registerAdmin(context *gin.Context) {
 		return
 	}
 
-	if err := admin.HashPassword(admin.Password); err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		context.Abort()
-		return
-	}
-
 	admin.IsAdmin = true
 	err := ag.database.CreateProfesor(&admin)
 	if err != nil {

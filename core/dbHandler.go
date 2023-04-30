@@ -89,12 +89,17 @@ func (db *DatabaseHandler) GetStudentsByClass(clasa string) ([]authentication.St
 
 // GetAllClasses returns all the users from a class
 func (db *DatabaseHandler) GetAllClasses() ([]string, error) {
-	var classes []string
+	var classes []authentication.Clasa
 	record := db.database.Table("clasas").Find(&classes)
 	if record.Error != nil {
 		return nil, record.Error
 	}
-	return classes, nil
+
+	var classList []string
+	for _, class := range classes {
+		classList = append(classList, class.Nume)
+	}
+	return classList, nil
 }
 
 // SetAbsent sets a student as absent
@@ -136,7 +141,12 @@ func (db *DatabaseHandler) CreateClass(class *Class) ([]*authentication.Student,
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	clasa := authentication.Clasa{Nume: class.Nume}
+	clasa := authentication.Clasa{
+		Nume:       class.Nume,
+		ProfMate:   class.ProfMate,
+		ProfBio:    class.ProfBio,
+		ProfFizica: class.ProfFizica,
+	}
 	record := db.database.Create(&clasa)
 	if record.Error != nil {
 		dbLogger.Error(record.Error.Error())
@@ -294,10 +304,8 @@ func (db *DatabaseHandler) checkCalificativ(profEmail string, calificativ *Calif
 	if exercitiu == nil {
 		return errors.New("exercitiu not found")
 	}
-	if exercitiu.PuctajMaxim < calificativ.Nota {
-		return errors.New("punctaj invalid")
-	}
 
+	class, err := db.GetClassByID(calificativ.Student)
 	prof, err := db.GetProfesorByEmail(profEmail)
 	if err != nil {
 		return err
@@ -305,8 +313,9 @@ func (db *DatabaseHandler) checkCalificativ(profEmail string, calificativ *Calif
 	if prof == nil {
 		return errors.New("profesor not found")
 	}
-	if exercitiu.Profesor != prof.ID {
-		return errors.New("profesor invalid")
+	err = db.checkProfesor(prof, class)
+	if err != nil {
+		return err
 	}
 	calificativ.Profesor = prof.ID
 
@@ -361,24 +370,62 @@ func (db *DatabaseHandler) GetExercitiiForProfesorAndStudent(email string, stude
 		return nil, record.Error
 	}
 
-	exam := student.Exam
-	var exercitii []*authentication.Exercitiu
-	record = db.database.
-		Table("exercitius").
-		Where("profesor = ? AND exam = ?", prof.ID, exam).
-		Scan(&exercitii)
+	var class authentication.Clasa
+	record = db.database.Where("nume = ?", student.Clasa).First(&class)
 	if record.Error != nil {
 		return nil, record.Error
 	}
-	// map to exercitiu
-	var exercitii2 []*Exercitiu
-	for _, exercitiu := range exercitii {
-		exercitii2 = append(exercitii2, &Exercitiu{
-			Numar:    exercitiu.Numar,
-			Variante: strings.Split(exercitiu.Variante, ";"),
-		})
+
+	err = db.checkProfesor(prof, &class)
+	if err != nil {
+		return make([]*Exercitiu, 0), err
 	}
-	return exercitii2, nil
+	var exercitii []authentication.Exercitiu
+	record = db.database.Where("materie = ? AND exam = ?", prof.Materie, student.Exam).Find(&exercitii)
+	if record.Error != nil {
+		return nil, record.Error
+	}
+
+	exercitiiReturn := make([]*Exercitiu, 0)
+	for _, exercitiu := range exercitii {
+		variante := strings.Split(exercitiu.Variante, ";")
+		exercitiuReturn := &Exercitiu{
+			Numar:    exercitiu.Numar,
+			Variante: variante,
+			Materie:  exercitiu.Materie,
+			Exam:     exercitiu.Exam,
+		}
+		exercitiiReturn = append(exercitiiReturn, exercitiuReturn)
+	}
+	return exercitiiReturn, nil
+}
+
+func (db *DatabaseHandler) GetClassByID(studentId uint) (*authentication.Clasa, error) {
+	var student authentication.Student
+	record := db.database.Where("id = ?", studentId).First(&student)
+	if record.Error != nil {
+		return nil, record.Error
+	}
+
+	var class authentication.Clasa
+	record = db.database.Where("id = ?", student.Clasa).First(&class)
+	if record.Error != nil {
+		return nil, record.Error
+	}
+	return &class, nil
+}
+
+func (db *DatabaseHandler) checkProfesor(prof *authentication.Profesor, class *authentication.Clasa) error {
+	if prof.ID == class.ProfMate {
+		return nil
+	}
+	if prof.ID == class.ProfBio {
+		return nil
+	}
+	if prof.ID == class.ProfFizica {
+		return nil
+	}
+	return errors.New("profesor invalid")
 }
 
 func GenerateRandomString(n int) string {

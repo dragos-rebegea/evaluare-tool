@@ -33,7 +33,10 @@ type User struct {
 }
 
 type Clasa struct {
-	Nume string `gorm:"primarykey" json:"nume"`
+	Nume       string `gorm:"primarykey" json:"nume"`
+	ProfMate   uint   `gorm:"foreignkey" json:"prof_mate"`
+	ProfFizica uint   `gorm:"foreignkey" json:"prof_fizica"`
+	ProfBio    uint   `gorm:"foreignkey" json:"prof_bio"`
 }
 
 type Student struct {
@@ -49,7 +52,6 @@ type Calificativ struct {
 	Exam      string `gorm:"primarykey" json:"exam"`
 	Exercitiu int    `gorm:"primarykey" json:"exercitiu"`
 	Varianta  string `json:"varianta"`
-	Nota      int    `json:"nota"`
 }
 
 func NewStudent(nume, prenume, clasa, email, password, exam string) *Student {
@@ -79,12 +81,10 @@ type Exam struct {
 }
 
 type Exercitiu struct {
-	Numar       uint   `gorm:"primarykey" json:"numar"`
-	Variante    string `json:"variante"`
-	Materie     string `json:"materie"`
-	Profesor    uint   `gorm:"foreignkey" json:"profesor"`
-	Exam        string `gorm:"primarykey" json:"exam"`
-	PuctajMaxim uint   `json:"punctaj_maxim"`
+	Numar    uint   `gorm:"primarykey" json:"numar"`
+	Variante string `json:"variante"`
+	Materie  string `json:"materie"`
+	Exam     string `gorm:"primarykey" json:"exam"`
 }
 
 func (user *User) HashPassword(password string) error {
