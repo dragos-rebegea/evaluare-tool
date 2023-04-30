@@ -93,8 +93,12 @@ func (ws *webServer) StartHttpServer() error {
 	gin.DisableConsoleColor()
 	gin.SetMode(gin.ReleaseMode)
 
+	ginconfig := cors.DefaultConfig()
+	ginconfig.AllowAllOrigins = true
+	ginconfig.AllowHeaders = []string{"Content-Type", "Authorization"}
+
 	engine = gin.Default()
-	engine.Use(cors.Default())
+	engine.Use(cors.New(ginconfig))
 
 	err := ws.createGroups()
 	if err != nil {

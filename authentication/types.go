@@ -13,6 +13,15 @@ const (
 	Fizica             = "Fizica"
 )
 
+type Varianta string
+
+const (
+	A Varianta = "A"
+	B          = "B"
+	C          = "C"
+	D          = "D"
+)
+
 type User struct {
 	gorm.Model
 	Nume     string `json:"nume"`
@@ -23,12 +32,27 @@ type User struct {
 	Type     string `json:"type"`
 }
 
-type Student struct {
-	User
-	Clasa string `json:"clasa"`
+type Clasa struct {
+	Nume string `gorm:"primarykey" json:"nume"`
 }
 
-func NewStudent(nume, prenume, clasa, email, password string) *Student {
+type Student struct {
+	User
+	Absent bool   `json:"absent"`
+	Clasa  string `gorm:"foreignkey" json:"clasa"`
+	Exam   string `gorm:"foreignkey" json:"exam"`
+}
+
+type Calificativ struct {
+	Student   uint   `gorm:"primarykey" json:"student_id"`
+	Profesor  uint   `json:"profesor_id"`
+	Exam      string `gorm:"primarykey" json:"exam"`
+	Exercitiu int    `gorm:"primarykey" json:"exercitiu"`
+	Varianta  string `json:"varianta"`
+	Nota      int    `json:"nota"`
+}
+
+func NewStudent(nume, prenume, clasa, email, password, exam string) *Student {
 	return &Student{
 		User: User{
 			Nume:     nume,
@@ -38,7 +62,9 @@ func NewStudent(nume, prenume, clasa, email, password string) *Student {
 			Password: password,
 			Type:     "student",
 		},
-		Clasa: clasa,
+		Absent: false,
+		Clasa:  clasa,
+		Exam:   exam,
 	}
 }
 
@@ -48,18 +74,17 @@ type Profesor struct {
 	Materie string `json:"materie"`
 }
 
-func NewProfesor(nume, prenume, materie, email, password string) *Profesor {
-	return &Profesor{
-		User: User{
-			Nume:     nume,
-			Prenume:  prenume,
-			Username: nume + "_" + prenume,
-			Email:    email,
-			Password: password,
-			Type:     "profesor",
-		},
-		Materie: materie,
-	}
+type Exam struct {
+	Nume string `gorm:"primarykey" json:"nume"`
+}
+
+type Exercitiu struct {
+	Numar       uint   `gorm:"primarykey" json:"numar"`
+	Variante    string `json:"variante"`
+	Materie     string `json:"materie"`
+	Profesor    uint   `gorm:"foreignkey" json:"profesor"`
+	Exam        string `gorm:"primarykey" json:"exam"`
+	PuctajMaxim uint   `json:"punctaj_maxim"`
 }
 
 func (user *User) HashPassword(password string) error {

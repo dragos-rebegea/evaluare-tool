@@ -20,6 +20,10 @@ func Connect(connectionString string) (*gorm.DB, error) {
 func Migrate(instance *gorm.DB) error {
 	err := instance.AutoMigrate(&Profesor{})
 	err = instance.AutoMigrate(&Student{})
+	err = instance.AutoMigrate(&Exam{})
+	err = instance.AutoMigrate(&Clasa{})
+	err = instance.AutoMigrate(&Exercitiu{})
+	err = instance.AutoMigrate(&Calificativ{})
 	if err != nil {
 		return err
 	}

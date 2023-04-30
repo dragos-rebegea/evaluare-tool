@@ -50,7 +50,7 @@ func NewAuthGroup(facade shared.FacadeHandler, dbHandler *core.DatabaseHandler) 
 		{
 			Path:    registerPath,
 			Method:  http.MethodPost,
-			Handler: ag.registerUser,
+			Handler: ag.registerAdmin,
 		},
 	}
 	ag.endpoints = endpoints
@@ -63,7 +63,7 @@ type TokenRequest struct {
 	Password string `json:"password"`
 }
 
-func (ag *authGroup) registerUser(context *gin.Context) {
+func (ag *authGroup) registerAdmin(context *gin.Context) {
 	var admin authentication.Profesor
 	if err := context.ShouldBindJSON(&admin); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -85,7 +85,13 @@ func (ag *authGroup) registerUser(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusCreated, gin.H{"userId": admin.ID, "email": admin.Email, "username": admin.Username})
+	context.JSON(http.StatusCreated, gin.H{
+		"userId":   admin.ID,
+		"email":    admin.Email,
+		"username": admin.Username,
+		"password": admin.Password,
+	})
+
 }
 
 func (ag *authGroup) generateToken(context *gin.Context) {

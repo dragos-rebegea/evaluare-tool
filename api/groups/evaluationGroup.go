@@ -1,6 +1,7 @@
 package groups
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
@@ -45,6 +46,31 @@ func NewEvaluationGroup(facade shared.FacadeHandler, dbHandler *core.DatabaseHan
 			Method:  http.MethodGet,
 			Handler: eg.getStudentsByClass,
 		},
+		{
+			Path:    "/getAllClasses",
+			Method:  http.MethodGet,
+			Handler: eg.getAllClasses,
+		},
+		{
+			Path:    "/addCalificativ",
+			Method:  http.MethodPost,
+			Handler: eg.addCalificativ,
+		},
+		{
+			Path:    "/updateCalificativ",
+			Method:  http.MethodPost,
+			Handler: eg.updateCalificativ,
+		},
+		{
+			Path:    "/getCalificative/:student",
+			Method:  http.MethodGet,
+			Handler: eg.getCalificative,
+		},
+		{
+			Path:    "/getExercitii/:student",
+			Method:  http.MethodGet,
+			Handler: eg.getExercitii,
+		},
 	}
 	eg.endpoints = endpoints
 
@@ -79,6 +105,181 @@ func (eg *evaluationGroup) getStudentsByClass(c *gin.Context) {
 			Code:  elrondApiShared.ReturnCodeSuccess,
 		},
 	)
+}
+
+func (eg *evaluationGroup) getAllClasses(c *gin.Context) {
+	if !eg.checkIfProfesor(c) {
+		return
+	}
+
+	classes, err := eg.database.GetAllClasses()
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		elrondApiShared.GenericAPIResponse{
+			Data:  classes,
+			Error: "",
+			Code:  elrondApiShared.ReturnCodeSuccess,
+		},
+	)
+}
+
+func (eg *evaluationGroup) addCalificativ(c *gin.Context) {
+	if !eg.checkIfProfesor(c) {
+		return
+	}
+
+	var calificativ core.Calificativ
+	err := json.NewDecoder(c.Request.Body).Decode(&calificativ)
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+	email := c.GetString(authentication.EmailKey)
+	err = eg.database.AddCalificativ(email, &calificativ)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  calificativ,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		elrondApiShared.GenericAPIResponse{
+			Data:  nil,
+			Error: "",
+			Code:  elrondApiShared.ReturnCodeSuccess,
+		},
+	)
+}
+
+// updateCalificativ
+func (eg *evaluationGroup) updateCalificativ(c *gin.Context) {
+	if !eg.checkIfProfesor(c) {
+		return
+	}
+
+	var calificativ core.Calificativ
+	err := json.NewDecoder(c.Request.Body).Decode(&calificativ)
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+	email := c.GetString(authentication.EmailKey)
+	err = eg.database.UpdateCalificativ(email, &calificativ)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  calificativ,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		elrondApiShared.GenericAPIResponse{
+			Data:  nil,
+			Error: "",
+			Code:  elrondApiShared.ReturnCodeSuccess,
+		},
+	)
+}
+
+func (eg *evaluationGroup) getExercitii(context *gin.Context) {
+	if !eg.checkIfProfesor(context) {
+		return
+	}
+
+	email := context.GetString(authentication.EmailKey)
+	student := context.Param("student")
+	exercitii, err := eg.database.GetExercitiiForProfesorAndStudent(email, student)
+	if err != nil {
+		context.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	context.JSON(
+		http.StatusOK,
+		elrondApiShared.GenericAPIResponse{
+			Data:  exercitii,
+			Error: "",
+			Code:  elrondApiShared.ReturnCodeSuccess,
+		},
+	)
+
+}
+
+func (eg *evaluationGroup) getCalificative(context *gin.Context) {
+	if !eg.checkIfProfesor(context) {
+		return
+	}
+
+	email := context.GetString(authentication.EmailKey)
+	student := context.Param("student")
+	calificative, err := eg.database.GetCalificative(email, student)
+	if err != nil {
+		context.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	context.JSON(
+		http.StatusOK,
+		elrondApiShared.GenericAPIResponse{
+			Data:  calificative,
+			Error: "",
+			Code:  elrondApiShared.ReturnCodeSuccess,
+		},
+	)
+
 }
 
 // UpdateFacade will update the facade

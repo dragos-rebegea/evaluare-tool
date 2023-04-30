@@ -6,5 +6,31 @@ type Class struct {
 		Nume    string `json:"nume"`
 		Prenume string `json:"prenume"`
 		Email   string `json:"email"`
+		Exam    string `json:"exam"`
 	} `json:"elevi"`
+}
+
+type AbsentStatus struct {
+	Id     uint `json:"id"`
+	Absent bool `json:"absent"`
+}
+
+type Exam struct {
+	Nume      string      `json:"nume"`
+	Exercitii []Exercitiu `json:"exercitii"`
+}
+
+type Exercitiu struct {
+	Numar    uint     `json:"numar"`
+	Variante []string `json:"variante"`
+	Materie  string   `json:"materie"`
+}
+
+type Calificativ struct {
+	Student   uint   `json:"student_id"`
+	Profesor  uint   `json:"profesor_id"`
+	Exam      string `json:"exam"`
+	Exercitiu int    `json:"exercitiu"`
+	Varianta  string `json:"varianta"`
+	Nota      uint   `json:"nota"`
 }

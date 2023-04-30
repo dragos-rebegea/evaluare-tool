@@ -50,6 +50,26 @@ func NewAdminGroup(facade shared.FacadeHandler, dbHandler *core.DatabaseHandler)
 			Method:  http.MethodPost,
 			Handler: ag.createClass,
 		},
+		{
+			Path:    "/createProfesor",
+			Method:  http.MethodPost,
+			Handler: ag.registerProfesor,
+		},
+		{
+			Path:    "/setAbsent",
+			Method:  http.MethodPost,
+			Handler: ag.setAbsent,
+		},
+		{
+			Path:    "/delStudent",
+			Method:  http.MethodPost,
+			Handler: ag.delStudent,
+		},
+		{
+			Path:    "/createExam",
+			Method:  http.MethodPost,
+			Handler: ag.createExam,
+		},
 	}
 	ag.endpoints = endpoints
 
@@ -102,6 +122,33 @@ func (ag *adminGroup) checkIfAdmin(c *gin.Context) bool {
 	return true
 }
 
+func (ag *adminGroup) registerProfesor(context *gin.Context) {
+	if !ag.checkIfAdmin(context) {
+		return
+	}
+	var prof authentication.Profesor
+	if err := context.ShouldBindJSON(&prof); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	prof.IsAdmin = false
+	err := ag.database.CreateProfesor(&prof)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusCreated, gin.H{
+		"userId":   prof.ID,
+		"email":    prof.Email,
+		"username": prof.Username,
+		"password": prof.Password,
+	})
+}
+
 func (ag *adminGroup) createClass(c *gin.Context) {
 	if !ag.checkIfAdmin(c) {
 		return
@@ -121,7 +168,115 @@ func (ag *adminGroup) createClass(c *gin.Context) {
 		return
 	}
 
-	err = ag.database.CreateClass(&class)
+	students, err := ag.database.CreateClass(&class)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+	for _, student := range students {
+		c.JSON(http.StatusCreated, gin.H{
+			"userId":   student.ID,
+			"email":    student.Email,
+			"username": student.Username,
+			"password": student.Password,
+		})
+	}
+}
+
+func (ag *adminGroup) setAbsent(c *gin.Context) {
+	if !ag.checkIfAdmin(c) {
+		return
+	}
+
+	var mark core.AbsentStatus
+	err := json.NewDecoder(c.Request.Body).Decode(&mark)
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	err = ag.database.SetAbsent(&mark)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+}
+
+func (ag *adminGroup) delStudent(c *gin.Context) {
+	if !ag.checkIfAdmin(c) {
+		return
+	}
+
+	var student authentication.Student
+	err := json.NewDecoder(c.Request.Body).Decode(&student)
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	err = ag.database.DeleteStudent(&student.ID)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+}
+
+// createExam will create a new exam
+func (ag *adminGroup) createExam(c *gin.Context) {
+	if !ag.checkIfAdmin(c) {
+		return
+	}
+
+	var exam core.Exam
+	err := json.NewDecoder(c.Request.Body).Decode(&exam)
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			elrondApiShared.GenericAPIResponse{
+				Data:  nil,
+				Error: err.Error(),
+				Code:  elrondApiShared.ReturnCodeInternalError,
+			},
+		)
+		return
+	}
+
+	err = ag.database.CreateExam(&exam)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

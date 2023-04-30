@@ -20,8 +20,17 @@
     Routes = [
         { Name = "/ping", Open = true },
         { Name = "/createClass", Open = true },
+        { Name = "/createProfesor", Open = true },
+        { Name = "/setAbsent", Open = true },
+        { Name = "/delStudent", Open = true },
+        { Name = "/createExam", Open = true },
     ]
 [APIPackages.evaluation]
     Routes = [
         { Name = "/getStudentsByClass/:class", Open = true },
+        { Name = "/getAllClasses", Open = true },
+        { Name = "/addCalificativ", Open = true },
+        { Name = "/updateCalificativ", Open = true },
+        { Name = "/getCalificative/:student", Open = true },
+        { Name = "/getExercitii/:student", Open = true },
     ]
