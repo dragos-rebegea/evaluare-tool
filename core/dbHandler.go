@@ -408,7 +408,7 @@ func (db *DatabaseHandler) GetClassByID(studentId uint) (*authentication.Clasa, 
 	}
 
 	var class authentication.Clasa
-	record = db.database.Where("id = ?", student.Clasa).First(&class)
+	record = db.database.Where("nume = ?", student.Clasa).First(&class)
 	if record.Error != nil {
 		return nil, record.Error
 	}
