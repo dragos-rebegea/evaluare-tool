@@ -112,7 +112,8 @@ func (eg *evaluationGroup) getAllClasses(c *gin.Context) {
 		return
 	}
 
-	classes, err := eg.database.GetAllClasses()
+	email := c.GetString(authentication.EmailKey)
+	classes, err := eg.database.GetAllClasses(email)
 	if err != nil {
 		c.JSON(
 			http.StatusInternalServerError,

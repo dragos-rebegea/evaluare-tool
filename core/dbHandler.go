@@ -88,15 +88,23 @@ func (db *DatabaseHandler) GetStudentsByClass(clasa string) ([]authentication.St
 }
 
 // GetAllClasses returns all the users from a class
-func (db *DatabaseHandler) GetAllClasses() ([]string, error) {
+func (db *DatabaseHandler) GetAllClasses(profEmail string) ([]string, error) {
 	var classes []authentication.Clasa
 	record := db.database.Table("clasas").Find(&classes)
 	if record.Error != nil {
 		return nil, record.Error
 	}
 
+	profesor, err := db.GetProfesorByEmail(profEmail)
+	if err != nil {
+		return nil, err
+	}
 	var classList []string
 	for _, class := range classes {
+		err = db.checkProfesor(profesor, &class)
+		if err != nil {
+			continue
+		}
 		classList = append(classList, class.Nume)
 	}
 	return classList, nil
