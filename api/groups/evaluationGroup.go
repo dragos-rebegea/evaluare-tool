@@ -170,7 +170,7 @@ func (eg *evaluationGroup) addCalificativ(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		elrondApiShared.GenericAPIResponse{
-			Data:  nil,
+			Data:  calificativ,
 			Error: "",
 			Code:  elrondApiShared.ReturnCodeSuccess,
 		},
@@ -213,7 +213,7 @@ func (eg *evaluationGroup) updateCalificativ(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		elrondApiShared.GenericAPIResponse{
-			Data:  nil,
+			Data:  calificativ,
 			Error: "",
 			Code:  elrondApiShared.ReturnCodeSuccess,
 		},
