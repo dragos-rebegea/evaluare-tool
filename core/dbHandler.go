@@ -279,7 +279,8 @@ func (db *DatabaseHandler) UpdateCalificativ(profEmail string, calificativ *Cali
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	record := db.database.Where("student = ? AND exercitiu = ?", calificativ.Student, calificativ.Exercitiu).First(&calificativ)
+	var calificativDb Calificativ
+	record := db.database.Where("student = ? AND exercitiu = ?", calificativ.Student, calificativ.Exercitiu).First(&calificativDb)
 	if record.Error != nil {
 		return record.Error
 	}
