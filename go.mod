@@ -1,6 +1,6 @@
 module github.com/dragos-rebegea/evaluare-tool
 
-go 1.15
+go 1.16
 
 require (
 	github.com/ElrondNetwork/elrond-go v1.3.36
