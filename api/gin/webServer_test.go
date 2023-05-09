@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ElrondNetwork/elrond-go-core/core/check"
-	"github.com/ElrondNetwork/elrond-go/api/middleware"
 	apiErrors "github.com/dragos-rebegea/evaluare-tool/api/errors"
 	"github.com/dragos-rebegea/evaluare-tool/api/shared"
 	"github.com/dragos-rebegea/evaluare-tool/config"
 	"github.com/dragos-rebegea/evaluare-tool/core"
 	"github.com/dragos-rebegea/evaluare-tool/testsCommon/facade"
 	"github.com/dragos-rebegea/evaluare-tool/testsCommon/groups"
+	"github.com/multiversx/mx-chain-core-go/core/check"
+	"github.com/multiversx/mx-chain-go/api/middleware"
 	"github.com/stretchr/testify/assert"
 )
 

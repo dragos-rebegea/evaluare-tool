@@ -8,14 +8,14 @@ import (
 	"syscall"
 	"time"
 
-	elrondCore "github.com/ElrondNetwork/elrond-go-core/core"
-	"github.com/ElrondNetwork/elrond-go-core/core/check"
-	logger "github.com/ElrondNetwork/elrond-go-logger"
-	elrondFactory "github.com/ElrondNetwork/elrond-go/cmd/node/factory"
-	elrondCommon "github.com/ElrondNetwork/elrond-go/common"
-	"github.com/ElrondNetwork/elrond-go/common/logging"
 	"github.com/dragos-rebegea/evaluare-tool/config"
 	"github.com/dragos-rebegea/evaluare-tool/factory"
+	elrondCore "github.com/multiversx/mx-chain-core-go/core"
+	"github.com/multiversx/mx-chain-core-go/core/check"
+	elrondFactory "github.com/multiversx/mx-chain-go/cmd/node/factory"
+	elrondCommon "github.com/multiversx/mx-chain-go/common"
+	logger "github.com/multiversx/mx-chain-logger-go"
+	"github.com/multiversx/mx-chain-logger-go/file"
 	"github.com/urfave/cli"
 	_ "github.com/urfave/cli"
 )
@@ -151,12 +151,12 @@ func attachFileLogger(log logger.Logger, flagsConfig config.ContextFlagsConfig) 
 	var fileLogging elrondFactory.FileLoggingHandler
 	var err error
 	if flagsConfig.SaveLogFile {
-		args := logging.ArgsFileLogging{
+		args := file.ArgsFileLogging{
 			WorkingDir:      flagsConfig.WorkingDir,
 			DefaultLogsPath: defaultLogsPath,
 			LogFilePrefix:   logFilePrefix,
 		}
-		fileLogging, err = logging.NewFileLogging(args)
+		fileLogging, err = file.NewFileLogging(args)
 		if err != nil {
 			return nil, fmt.Errorf("%w creating a log file", err)
 		}

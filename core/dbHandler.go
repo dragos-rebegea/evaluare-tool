@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	logger "github.com/ElrondNetwork/elrond-go-logger"
 	"github.com/dragos-rebegea/evaluare-tool/authentication"
+	logger "github.com/multiversx/mx-chain-logger-go"
 	"gorm.io/gorm"
 )
 

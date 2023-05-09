@@ -8,7 +8,8 @@ import (
 )
 
 func Connect(connectionString string) (*gorm.DB, error) {
-	instance, dbError := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+	mysql := mysql.Open(connectionString)
+	instance, dbError := gorm.Open(mysql, &gorm.Config{})
 	if dbError != nil {
 		log.Fatal(dbError)
 		return nil, dbError

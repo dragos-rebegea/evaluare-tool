@@ -7,12 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ElrondNetwork/elrond-go-core/core/check"
-	"github.com/ElrondNetwork/elrond-go-core/marshal"
-	logger "github.com/ElrondNetwork/elrond-go-logger"
-	"github.com/ElrondNetwork/elrond-go/api/logs"
-	"github.com/ElrondNetwork/elrond-go/api/middleware"
-	elrondShared "github.com/ElrondNetwork/elrond-go/api/shared"
 	"github.com/btcsuite/websocket"
 	apiErrors "github.com/dragos-rebegea/evaluare-tool/api/errors"
 	"github.com/dragos-rebegea/evaluare-tool/api/groups"
@@ -23,6 +17,12 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/multiversx/mx-chain-core-go/core/check"
+	"github.com/multiversx/mx-chain-core-go/marshal"
+	"github.com/multiversx/mx-chain-go/api/logs"
+	"github.com/multiversx/mx-chain-go/api/middleware"
+	elrondShared "github.com/multiversx/mx-chain-go/api/shared"
+	logger "github.com/multiversx/mx-chain-logger-go"
 )
 
 var log = logger.GetOrCreate("api")
@@ -137,7 +137,7 @@ func (ws *webServer) StartHttpServer() error {
 func (ws *webServer) createGroups() error {
 	groupsMap := make(map[string]shared.GroupHandler)
 
-	dbHandler, err := core.NewDatabaseHandler("doadmin:AVNS_NTbsyl27r8cWCjPYQVI@db-mysql-fra1-74446-do-user-14078486-0.b.db.ondigitalocean.com:25060/id_db?ssl-mode=REQUIRED&parseTime=true")
+	dbHandler, err := core.NewDatabaseHandler("dragos:AVNS_UML_UBE0UxB_vSJngi-@tcp(db-mysql-fra1-74446-do-user-14078486-0.b.db.ondigitalocean.com:25060)/id_db?parseTime=true")
 
 	authGroup, err := groups.NewAuthGroup(ws.facade, dbHandler)
 	if err != nil {

@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/ElrondNetwork/elrond-go-core/core/check"
-	"github.com/ElrondNetwork/elrond-go/api/errors"
-	elrondApiShared "github.com/ElrondNetwork/elrond-go/api/shared"
 	"github.com/dragos-rebegea/evaluare-tool/api/shared"
 	"github.com/dragos-rebegea/evaluare-tool/authentication"
 	"github.com/dragos-rebegea/evaluare-tool/core"
 	"github.com/gin-gonic/gin"
+	"github.com/multiversx/mx-chain-core-go/core/check"
+	"github.com/multiversx/mx-chain-go/api/errors"
+	elrondApiShared "github.com/multiversx/mx-chain-go/api/shared"
 )
 
 const tokenPath = "/token"

@@ -1,6 +1,6 @@
 package testsCommon
 
-import "github.com/ElrondNetwork/elrond-sdk-erdgo/data"
+/data"
 
 // GuardianStub -
 type GuardianStub struct {
