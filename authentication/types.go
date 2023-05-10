@@ -33,17 +33,20 @@ type User struct {
 }
 
 type Clasa struct {
-	Nume       string `gorm:"primarykey" json:"nume"`
-	ProfMate   uint   `gorm:"foreignkey" json:"prof_mate"`
-	ProfFizica uint   `gorm:"foreignkey" json:"prof_fizica"`
-	ProfBio    uint   `gorm:"foreignkey" json:"prof_bio"`
+	Nume        string `gorm:"primarykey" json:"nume"`
+	ProfMate    uint   `gorm:"foreignkey" json:"prof_mate"`
+	ProfFizica  uint   `gorm:"foreignkey" json:"prof_fizica"`
+	ProfBio     uint   `gorm:"foreignkey" json:"prof_bio"`
+	ProfRomana  uint   `gorm:"foreignkey" json:"prof_romana"`
+	ProfEngleza uint   `gorm:"foreignkey" json:"prof_engleza"`
 }
 
 type Student struct {
 	User
-	Absent bool   `json:"absent"`
-	Clasa  string `gorm:"foreignkey" json:"clasa"`
-	Exam   string `gorm:"foreignkey" json:"exam"`
+	Absent      bool   `json:"absent"`
+	Clasa       string `gorm:"foreignkey" json:"clasa"`
+	ExamStiinta string `gorm:"foreignkey" json:"exam_stiinta"`
+	ExamLimba   string `gorm:"foreignkey" json:"exam_limba"`
 }
 
 type Calificativ struct {
@@ -54,7 +57,7 @@ type Calificativ struct {
 	Varianta  string `json:"varianta"`
 }
 
-func NewStudent(nume, prenume, clasa, email, password, exam string) *Student {
+func NewStudent(nume, prenume, clasa, email, password, examStiinta, examLimba string) *Student {
 	return &Student{
 		User: User{
 			Nume:     nume,
@@ -64,9 +67,10 @@ func NewStudent(nume, prenume, clasa, email, password, exam string) *Student {
 			Password: password,
 			Type:     "student",
 		},
-		Absent: false,
-		Clasa:  clasa,
-		Exam:   exam,
+		Absent:      false,
+		Clasa:       clasa,
+		ExamStiinta: examStiinta,
+		ExamLimba:   examLimba,
 	}
 }
 

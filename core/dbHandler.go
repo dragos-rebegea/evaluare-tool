@@ -54,9 +54,19 @@ func (db *DatabaseHandler) GetExamByName(name string) (*authentication.Exam, err
 }
 
 // GetExercitiuByName returns a student by name
-func (db *DatabaseHandler) GetExercitiuByExamAndNumber(exam string, number int) (*authentication.Exercitiu, error) {
+func (db *DatabaseHandler) GetExercitiuStiintaByExamAndNumber(exam string, number int) (*authentication.Exercitiu, error) {
 	var exercitiu authentication.Exercitiu
-	record := db.database.Where("exam = ? AND numar = ?", exam, number).First(&exercitiu)
+	record := db.database.Where("exam_stiinta = ? AND numar = ?", exam, number).First(&exercitiu)
+	if record.Error != nil {
+		return nil, record.Error
+	}
+	return &exercitiu, nil
+}
+
+// GetExercitiuByName returns a student by name
+func (db *DatabaseHandler) GetExercitiuLimbaByExamAndNumber(exam string, number int) (*authentication.Exercitiu, error) {
+	var exercitiu authentication.Exercitiu
+	record := db.database.Where("exam_limba = ? AND numar = ?", exam, number).First(&exercitiu)
 	if record.Error != nil {
 		return nil, record.Error
 	}
@@ -164,7 +174,7 @@ func (db *DatabaseHandler) CreateClass(class *Class) ([]*authentication.Student,
 	for _, student := range class.Elevi {
 		// generate random password
 		password := GenerateRandomString(10)
-		studentDb := authentication.NewStudent(student.Nume, student.Prenume, class.Nume, student.Email, password, student.Exam)
+		studentDb := authentication.NewStudent(student.Nume, student.Prenume, class.Nume, student.Email, password, student.ExamStiinta, student.ExamLimba)
 		if err := studentDb.HashPassword(password); err != nil {
 			return nil, errors.New("error hashing password")
 		}
@@ -306,15 +316,6 @@ func (db *DatabaseHandler) checkCalificativ(profEmail string, calificativ *Calif
 		return errors.New("student not found")
 	}
 
-	exercitiu, err := db.GetExercitiuByExamAndNumber(calificativ.Exam, calificativ.Exercitiu)
-	if err != nil {
-		return err
-	}
-	if exercitiu == nil {
-		return errors.New("exercitiu not found")
-	}
-
-	class, err := db.GetClassByID(calificativ.Student)
 	prof, err := db.GetProfesorByEmail(profEmail)
 	if err != nil {
 		return err
@@ -322,6 +323,27 @@ func (db *DatabaseHandler) checkCalificativ(profEmail string, calificativ *Calif
 	if prof == nil {
 		return errors.New("profesor not found")
 	}
+	tip := getTypeByMaterie(prof.Materie)
+	var exercitiu *authentication.Exercitiu
+	if tip == "stiinta" {
+		exercitiu, err = db.GetExercitiuStiintaByExamAndNumber(calificativ.Exam, calificativ.Exercitiu)
+		if err != nil {
+			return err
+		}
+		if exercitiu == nil {
+			return errors.New("exercitiu not found")
+		}
+	} else {
+		exercitiu, err = db.GetExercitiuLimbaByExamAndNumber(calificativ.Exam, calificativ.Exercitiu)
+		if err != nil {
+			return err
+		}
+		if exercitiu == nil {
+			return errors.New("exercitiu not found")
+		}
+	}
+
+	class, err := db.GetClassByID(calificativ.Student)
 	err = db.checkProfesor(prof, class)
 	if err != nil {
 		return err
@@ -390,9 +412,12 @@ func (db *DatabaseHandler) GetExercitiiForProfesorAndStudent(email string, stude
 		return make([]*Exercitiu, 0), err
 	}
 	var exercitii []authentication.Exercitiu
-	record = db.database.Where("materie = ? AND exam = ?", prof.Materie, student.Exam).Find(&exercitii)
+	record = db.database.Where("materie = ? AND exam_stiinta = ?", prof.Materie, student.ExamStiinta).Find(&exercitii)
 	if record.Error != nil {
-		return nil, record.Error
+		record = db.database.Where("materie = ? AND exam_limba = ?", prof.Materie, student.ExamLimba).Find(&exercitii)
+		if record.Error != nil {
+			return nil, record.Error
+		}
 	}
 
 	exercitiiReturn := make([]*Exercitiu, 0)
@@ -434,6 +459,12 @@ func (db *DatabaseHandler) checkProfesor(prof *authentication.Profesor, class *a
 	if prof.ID == class.ProfFizica {
 		return nil
 	}
+	if prof.ID == class.ProfRomana {
+		return nil
+	}
+	if prof.ID == class.ProfEngleza {
+		return nil
+	}
 	return errors.New("profesor invalid")
 }
 
@@ -455,4 +486,17 @@ func contains(s []string, str string) bool {
 	}
 
 	return false
+}
+
+func getTypeByMaterie(materie string) string {
+	if materie == "matematica" {
+		return "stiinta"
+	}
+	if materie == "biologie" {
+		return "stiinta"
+	}
+	if materie == "fizica" {
+		return "stiinta"
+	}
+	return "limba"
 }

@@ -3,14 +3,17 @@ package core
 type Class struct {
 	Nume  string `json:"nume"`
 	Elevi []struct {
-		Nume    string `json:"nume"`
-		Prenume string `json:"prenume"`
-		Email   string `json:"email"`
-		Exam    string `json:"exam"`
+		Nume        string `json:"nume"`
+		Prenume     string `json:"prenume"`
+		Email       string `json:"email"`
+		ExamStiinta string `json:"exam_stiinta"`
+		ExamLimba   string `json:"exam_limba"`
 	} `json:"elevi"`
-	ProfMate   uint `json:"prof_mate"`
-	ProfFizica uint `json:"prof_fizica"`
-	ProfBio    uint `json:"prof_bio"`
+	ProfMate    uint `json:"prof_mate"`
+	ProfFizica  uint `json:"prof_fizica"`
+	ProfBio     uint `json:"prof_bio"`
+	ProfRomana  uint `json:"prof_romana"`
+	ProfEngleza uint `json:"prof_engleza"`
 }
 
 type AbsentStatus struct {

@@ -137,7 +137,7 @@ func (ws *webServer) StartHttpServer() error {
 func (ws *webServer) createGroups() error {
 	groupsMap := make(map[string]shared.GroupHandler)
 
-	dbHandler, err := core.NewDatabaseHandler("dragos:AVNS_UML_UBE0UxB_vSJngi-@tcp(db-mysql-fra1-74446-do-user-14078486-0.b.db.ondigitalocean.com:25060)/id_db?parseTime=true")
+	dbHandler, err := core.NewDatabaseHandler("user:password@tcp(localhost:3315)/id_db?parseTime=true")
 
 	authGroup, err := groups.NewAuthGroup(ws.facade, dbHandler)
 	if err != nil {
