@@ -71,6 +71,11 @@ func NewEvaluationGroup(facade shared.FacadeHandler, dbHandler *core.DatabaseHan
 			Method:  http.MethodGet,
 			Handler: eg.getExercitii,
 		},
+		{
+			Path:    "/ping",
+			Method:  http.MethodGet,
+			Handler: eg.ping,
+		},
 	}
 	eg.endpoints = endpoints
 
@@ -281,6 +286,21 @@ func (eg *evaluationGroup) getCalificative(context *gin.Context) {
 		},
 	)
 
+}
+
+func (eg *evaluationGroup) ping(c *gin.Context) {
+	if !eg.checkIfProfesor(c) {
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		elrondApiShared.GenericAPIResponse{
+			Data:  "pong",
+			Error: "",
+			Code:  elrondApiShared.ReturnCodeSuccess,
+		},
+	)
 }
 
 // UpdateFacade will update the facade

@@ -160,10 +160,12 @@ func (db *DatabaseHandler) CreateClass(class *Class) ([]*authentication.Student,
 	defer db.mutex.Unlock()
 
 	clasa := authentication.Clasa{
-		Nume:       class.Nume,
-		ProfMate:   class.ProfMate,
-		ProfBio:    class.ProfBio,
-		ProfFizica: class.ProfFizica,
+		Nume:        class.Nume,
+		ProfMate:    class.ProfMate,
+		ProfBio:     class.ProfBio,
+		ProfFizica:  class.ProfFizica,
+		ProfRomana:  class.ProfRomana,
+		ProfEngleza: class.ProfEngleza,
 	}
 	record := db.database.Create(&clasa)
 	if record.Error != nil {
@@ -412,9 +414,15 @@ func (db *DatabaseHandler) GetExercitiiForProfesorAndStudent(email string, stude
 		return make([]*Exercitiu, 0), err
 	}
 	var exercitii []authentication.Exercitiu
-	record = db.database.Where("materie = ? AND exam_stiinta = ?", prof.Materie, student.ExamStiinta).Find(&exercitii)
-	if record.Error != nil {
-		record = db.database.Where("materie = ? AND exam_limba = ?", prof.Materie, student.ExamLimba).Find(&exercitii)
+
+	tip := getTypeByMaterie(prof.Materie)
+	if tip == "stiinta" {
+		record = db.database.Where("materie = ? AND exam = ?", prof.Materie, student.ExamStiinta).Find(&exercitii)
+		if record.Error != nil {
+			return nil, record.Error
+		}
+	} else {
+		record = db.database.Where("materie = ? AND exam = ?", prof.Materie, student.ExamLimba).Find(&exercitii)
 		if record.Error != nil {
 			return nil, record.Error
 		}
@@ -450,19 +458,19 @@ func (db *DatabaseHandler) GetClassByID(studentId uint) (*authentication.Clasa, 
 }
 
 func (db *DatabaseHandler) checkProfesor(prof *authentication.Profesor, class *authentication.Clasa) error {
-	if prof.ID == class.ProfMate {
+	if prof.Username == class.ProfMate {
 		return nil
 	}
-	if prof.ID == class.ProfBio {
+	if prof.Username == class.ProfBio {
 		return nil
 	}
-	if prof.ID == class.ProfFizica {
+	if prof.Username == class.ProfFizica {
 		return nil
 	}
-	if prof.ID == class.ProfRomana {
+	if prof.Username == class.ProfRomana {
 		return nil
 	}
-	if prof.ID == class.ProfEngleza {
+	if prof.Username == class.ProfEngleza {
 		return nil
 	}
 	return errors.New("profesor invalid")

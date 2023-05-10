@@ -34,11 +34,11 @@ type User struct {
 
 type Clasa struct {
 	Nume        string `gorm:"primarykey" json:"nume"`
-	ProfMate    uint   `gorm:"foreignkey" json:"prof_mate"`
-	ProfFizica  uint   `gorm:"foreignkey" json:"prof_fizica"`
-	ProfBio     uint   `gorm:"foreignkey" json:"prof_bio"`
-	ProfRomana  uint   `gorm:"foreignkey" json:"prof_romana"`
-	ProfEngleza uint   `gorm:"foreignkey" json:"prof_engleza"`
+	ProfMate    string `gorm:"foreignkey" json:"prof_mate"`
+	ProfFizica  string `gorm:"foreignkey" json:"prof_fizica"`
+	ProfBio     string `gorm:"foreignkey" json:"prof_bio"`
+	ProfRomana  string `gorm:"foreignkey" json:"prof_romana"`
+	ProfEngleza string `gorm:"foreignkey" json:"prof_engleza"`
 }
 
 type Student struct {
@@ -85,7 +85,7 @@ type Exam struct {
 }
 
 type Exercitiu struct {
-	Numar    uint   `gorm:"primarykey" json:"numar"`
+	Numar    string `gorm:"primarykey" json:"numar"`
 	Variante string `json:"variante"`
 	Materie  string `json:"materie"`
 	Exam     string `gorm:"primarykey" json:"exam"`

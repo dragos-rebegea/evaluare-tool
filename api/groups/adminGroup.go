@@ -41,11 +41,6 @@ func NewAdminGroup(facade shared.FacadeHandler, dbHandler *core.DatabaseHandler)
 
 	endpoints := []*elrondApiShared.EndpointHandlerData{
 		{
-			Path:    "/ping",
-			Method:  http.MethodGet,
-			Handler: ag.ping,
-		},
-		{
 			Path:    "/createClass",
 			Method:  http.MethodPost,
 			Handler: ag.createClass,
@@ -74,21 +69,6 @@ func NewAdminGroup(facade shared.FacadeHandler, dbHandler *core.DatabaseHandler)
 	ag.endpoints = endpoints
 
 	return ag, nil
-}
-
-func (ag *adminGroup) ping(c *gin.Context) {
-	if !ag.checkIfAdmin(c) {
-		return
-	}
-
-	c.JSON(
-		http.StatusOK,
-		elrondApiShared.GenericAPIResponse{
-			Data:  "pong",
-			Error: "",
-			Code:  elrondApiShared.ReturnCodeSuccess,
-		},
-	)
 }
 
 func (ag *adminGroup) checkIfAdmin(c *gin.Context) bool {

@@ -9,11 +9,11 @@ type Class struct {
 		ExamStiinta string `json:"exam_stiinta"`
 		ExamLimba   string `json:"exam_limba"`
 	} `json:"elevi"`
-	ProfMate    uint `json:"prof_mate"`
-	ProfFizica  uint `json:"prof_fizica"`
-	ProfBio     uint `json:"prof_bio"`
-	ProfRomana  uint `json:"prof_romana"`
-	ProfEngleza uint `json:"prof_engleza"`
+	ProfMate    string `json:"prof_mate"`
+	ProfFizica  string `json:"prof_fizica"`
+	ProfBio     string `json:"prof_bio"`
+	ProfRomana  string `json:"prof_romana"`
+	ProfEngleza string `json:"prof_engleza"`
 }
 
 type AbsentStatus struct {
@@ -27,7 +27,7 @@ type Exam struct {
 }
 
 type Exercitiu struct {
-	Numar    uint     `json:"numar"`
+	Numar    string   `json:"numar"`
 	Variante []string `json:"variante"`
 	Materie  string   `json:"materie"`
 	Exam     string   `json:"exam"`
