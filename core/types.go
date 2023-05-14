@@ -37,6 +37,6 @@ type Calificativ struct {
 	Student   uint   `json:"student_id"`
 	Profesor  uint   `json:"profesor_id"`
 	Exam      string `json:"exam"`
-	Exercitiu int    `json:"exercitiu"`
+	Exercitiu string `json:"exercitiu"`
 	Varianta  string `json:"varianta"`
 }
