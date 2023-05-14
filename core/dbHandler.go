@@ -54,7 +54,7 @@ func (db *DatabaseHandler) GetExamByName(name string) (*authentication.Exam, err
 }
 
 // GetExercitiuByName returns a student by name
-func (db *DatabaseHandler) GetExercitiuStiintaByExamAndNumber(exam string, number int) (*authentication.Exercitiu, error) {
+func (db *DatabaseHandler) GetExercitiuStiintaByExamAndNumber(exam string, number string) (*authentication.Exercitiu, error) {
 	var exercitiu authentication.Exercitiu
 	record := db.database.Where("exam_stiinta = ? AND numar = ?", exam, number).First(&exercitiu)
 	if record.Error != nil {
@@ -64,7 +64,7 @@ func (db *DatabaseHandler) GetExercitiuStiintaByExamAndNumber(exam string, numbe
 }
 
 // GetExercitiuByName returns a student by name
-func (db *DatabaseHandler) GetExercitiuLimbaByExamAndNumber(exam string, number int) (*authentication.Exercitiu, error) {
+func (db *DatabaseHandler) GetExercitiuLimbaByExamAndNumber(exam string, number string) (*authentication.Exercitiu, error) {
 	var exercitiu authentication.Exercitiu
 	record := db.database.Where("exam_limba = ? AND numar = ?", exam, number).First(&exercitiu)
 	if record.Error != nil {
